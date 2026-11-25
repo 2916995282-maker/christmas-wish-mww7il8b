@@ -1,0 +1,1491 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#020712">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Create a personal Christmas wish with an interactive, glowing particle tree.">
+<meta property="og:title" content="A Christmas Wish">
+<meta property="og:description" content="Enter a name and light the tree.">
+<title>A Christmas Wish</title>
+<style>
+  :root {
+    color-scheme: dark;
+    background: #020712;
+  }
+
+  html, body {
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #020712;
+    color: #eefaff;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+
+  body > #blue-particle-tree {
+    box-sizing: border-box;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: max(12px, env(safe-area-inset-top)) 16px
+      max(20px, env(safe-area-inset-bottom));
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .form-label {
+    display: block;
+    margin: 0 0 6px;
+    color: #c9eaff;
+    font-family: "Cormorant Garamond", "Baskerville", Georgia, "Times New Roman", serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+  }
+
+  .form-control {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 13px;
+    border: 1px solid rgba(145, 220, 255, 0.32);
+    border-radius: 10px;
+    background: rgba(2, 13, 31, 0.84);
+    color: #f2fbff;
+    font-family: "Cormorant Garamond", "Baskerville", Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.2;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .form-control:focus {
+    border-color: rgba(127, 219, 255, 0.82);
+    box-shadow: 0 0 0 3px rgba(83, 184, 255, 0.16);
+  }
+
+  .form-control::placeholder {
+    color: rgba(190, 225, 245, 0.58);
+  }
+
+  .btn {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    border: 1px solid rgba(155, 224, 255, 0.38);
+    border-radius: 999px;
+    background: rgba(6, 28, 53, 0.82);
+    color: #edfaff;
+    font-family: "Cormorant Garamond", "Baskerville", Georgia, "Times New Roman", serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary {
+    border-color: rgba(169, 235, 255, 0.62);
+    background: linear-gradient(135deg, #dffaff 0%, #8bd8ff 52%, #60a8ff 100%);
+    color: #04162e;
+    box-shadow: 0 8px 24px rgba(48, 153, 255, 0.24);
+  }
+
+  @media (max-width: 560px) {
+    body > #blue-particle-tree {
+      padding-right: 13px;
+      padding-left: 13px;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="blue-particle-tree">
+  <style>
+    #blue-particle-tree {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      --tree-ink: #eefaff;
+      --tree-muted: #9dc9e8;
+      --tree-panel: rgba(4, 17, 38, 0.82);
+      --tree-line: rgba(135, 212, 255, 0.22);
+    }
+
+    #blue-particle-tree,
+    #blue-particle-tree *,
+    #blue-particle-tree *::before,
+    #blue-particle-tree *::after {
+      box-sizing: border-box;
+    }
+
+    #blue-particle-tree .tree-stage {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      height: 480px;
+      aspect-ratio: 1.42 / 1;
+      overflow: hidden;
+      border: 1px solid var(--tree-line);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 50% 36%, rgba(22, 96, 176, 0.28), transparent 34%),
+        linear-gradient(155deg, #020713 0%, #06162e 54%, #020712 100%);
+      box-shadow: 0 22px 60px rgba(2, 7, 20, 0.3);
+      color-scheme: dark;
+      isolation: isolate;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    #blue-particle-tree .tree-stage:active {
+      cursor: grabbing;
+    }
+
+    #blue-particle-tree canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #blue-particle-tree .tree-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 100%;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    #blue-particle-tree .tree-greeting-field {
+      display: grid;
+      flex: 0 0 auto;
+      gap: 6px;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    #blue-particle-tree .tree-sparkle-button {
+      align-self: flex-start;
+    }
+
+    #blue-particle-tree [hidden] {
+      display: none !important;
+    }
+
+    #blue-particle-tree .tree-entry {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      inset: 0;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(14, 63, 123, 0.16), transparent 45%),
+        rgba(1, 7, 19, 0.28);
+      transition:
+        opacity 700ms ease,
+        visibility 700ms ease;
+    }
+
+    #blue-particle-tree .tree-entry.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #blue-particle-tree .tree-entry-card {
+      width: 100%;
+      max-width: 430px;
+      width: min(100%, 430px);
+      padding: 28px clamp(20px, 5vw, 36px);
+      border: 1px solid rgba(145, 220, 255, 0.23);
+      border-radius: 16px;
+      background: rgba(3, 17, 38, 0.78);
+      box-shadow:
+        0 22px 70px rgba(0, 4, 15, 0.42),
+        inset 0 1px 0 rgba(220, 248, 255, 0.08);
+      text-align: center;
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+    }
+
+    #blue-particle-tree .tree-entry-kicker {
+      margin: 0 0 9px;
+      color: #a9dbf4;
+      font-family: "Cormorant SC", "Cormorant Garamond", Georgia, serif;
+      font-size: 12px;
+      letter-spacing: 0.24em;
+    }
+
+    #blue-particle-tree .tree-entry-title {
+      margin: 0;
+      color: #f2fbff;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 36px;
+      font-size: clamp(30px, 6vw, 43px);
+      font-weight: 500;
+      line-height: 1;
+      text-shadow: 0 0 24px rgba(92, 194, 255, 0.38);
+    }
+
+    #blue-particle-tree .tree-entry-copy {
+      margin: 12px 0 20px;
+      color: #a9dbf4;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 16px;
+      letter-spacing: 0.06em;
+    }
+
+    #blue-particle-tree .tree-entry-form {
+      display: grid;
+      gap: 12px;
+      text-align: left;
+    }
+
+    #blue-particle-tree .tree-entry-form .form-control {
+      width: 100%;
+    }
+
+    #blue-particle-tree .tree-entry .form-label {
+      color: #a9dbf4;
+    }
+
+    #blue-particle-tree .tree-greeting-field .form-control {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    #blue-particle-tree .tree-hint {
+      margin: 8px 2px 0;
+      color: var(--muted-foreground, #6c7a89);
+    }
+
+    #blue-particle-tree .tree-hint::before {
+      display: inline-block;
+      width: 18px;
+      height: 1px;
+      margin-right: 7px;
+      vertical-align: middle;
+      background: currentColor;
+      content: "";
+      opacity: 0.55;
+    }
+
+    #blue-particle-tree .tree-controls[hidden] + .tree-hint {
+      display: none;
+    }
+
+    @media (max-width: 560px) {
+      #blue-particle-tree .tree-stage {
+        height: 380px;
+        aspect-ratio: 0.94 / 1;
+        border-radius: 14px;
+      }
+
+      #blue-particle-tree .tree-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      #blue-particle-tree .tree-greeting-field {
+        width: 100%;
+      }
+
+      #blue-particle-tree .tree-entry-kicker {
+        letter-spacing: 0.14em;
+      }
+
+    }
+
+    @supports (aspect-ratio: 1 / 1) {
+      #blue-particle-tree .tree-stage {
+        height: auto;
+      }
+    }
+  </style>
+
+  <div class="tree-stage">
+    <canvas
+      id="tree-canvas"
+      role="img"
+      aria-label="An icy blue particle Christmas tree wrapped in luminous spiral ribbons, with snow and a brilliant star."
+    ></canvas>
+    <div id="tree-status" class="sr-only" aria-live="polite">An icy blue particle Christmas tree. Enter a recipient's name for a personal Christmas greeting.</div>
+    <div id="tree-entry" class="tree-entry">
+      <form id="tree-entry-form" class="tree-entry-card">
+        <p class="tree-entry-kicker">A PERSONAL CHRISTMAS WISH</p>
+        <h2 class="tree-entry-title">Who is this for?</h2>
+        <p class="tree-entry-copy">Type a name, then watch the tree come alive.</p>
+        <div class="tree-entry-form">
+          <label class="form-label" for="tree-name-entry">RECIPIENT'S NAME</label>
+          <input
+            class="form-control"
+            id="tree-name-entry"
+            type="text"
+            value="MY FRIEND"
+            maxlength="24"
+            placeholder="Enter a name"
+            autocomplete="off"
+          >
+          <button id="tree-light-button" class="btn btn-primary" type="button">LIGHT THE TREE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="tree-controls" class="tree-controls viz-controls" aria-label="Christmas tree controls" hidden>
+    <div class="tree-greeting-field">
+      <label class="form-label" for="tree-name">RECIPIENT'S NAME</label>
+      <input
+        class="form-control"
+        id="tree-name"
+        type="text"
+        value="MY FRIEND"
+        maxlength="24"
+        placeholder="Enter a name"
+        autocomplete="off"
+      >
+    </div>
+    <button id="tree-sparkle" class="btn btn-primary tree-sparkle-button" type="button">
+      SPARKLE
+    </button>
+  </div>
+  <p class="tree-hint text-small">Drag to rotate · Tap the tree for stardust</p>
+
+  <script>
+    (() => {
+      const root = document.getElementById("blue-particle-tree");
+      const canvas = document.getElementById("tree-canvas");
+      const stage = root.querySelector(".tree-stage");
+      const nameInput = document.getElementById("tree-name");
+      const entry = document.getElementById("tree-entry");
+      const entryForm = document.getElementById("tree-entry-form");
+      const lightButton = document.getElementById("tree-light-button");
+      const nameEntry = document.getElementById("tree-name-entry");
+      const controls = document.getElementById("tree-controls");
+      const sparkleButton = document.getElementById("tree-sparkle");
+      const status = document.getElementById("tree-status");
+      const ctx = canvas.getContext("2d");
+
+      const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const state = {
+        recipientName: "MY FRIEND",
+        spinning: !reducedMotionQuery.matches,
+        yaw: -0.28,
+        velocity: 0,
+        dragging: false,
+        lastPointerX: 0,
+        lastPointerY: 0,
+        lastFrame: 0,
+        width: 0,
+        height: 0,
+        dpr: 1,
+        pointerX: 0,
+        pointerY: 0,
+        pointerActive: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        dragDistance: 0,
+        revealed: false,
+        revealProgress: 0,
+      };
+
+      function mulberry32(seed) {
+        return function random() {
+          let value = (seed += 0x6d2b79f5);
+          value = Math.imul(value ^ (value >>> 15), value | 1);
+          value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+          return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      const random = mulberry32(20261225);
+      const treePoints = [];
+      const ribbons = [];
+      const branches = [];
+      const backgroundStars = [];
+      const snowflakes = [];
+      const bursts = [];
+
+      for (let spiral = 0; spiral < 7; spiral += 1) {
+        const points = [];
+        for (let step = 0; step <= 92; step += 1) {
+          const t = step / 92;
+          const angle = (spiral / 7) * Math.PI * 2 + t * Math.PI * 4.65;
+          const radius =
+            0.48 *
+            Math.pow(t, 0.98) *
+            (1 + Math.sin(angle * 2.4 + spiral) * 0.025);
+          const point = {
+            x: Math.cos(angle) * radius,
+            y: -0.445 + t * 0.89 + Math.sin(angle * 2 + spiral) * 0.008,
+            z: Math.sin(angle) * radius,
+          };
+          points.push(point);
+
+          for (let bead = 0; bead < (step % 3 === 0 ? 2 : 1); bead += 1) {
+            treePoints.push({
+              x: point.x + (random() - 0.5) * (bead ? 0.05 : 0.024),
+              y: point.y + (random() - 0.5) * (bead ? 0.042 : 0.022),
+              z: point.z + (random() - 0.5) * (bead ? 0.05 : 0.024),
+              size: 0.32 + random() * 1.12,
+              alpha: 0.34 + random() * 0.66,
+              hue: 186 + random() * 28,
+              phase: random() * Math.PI * 2,
+              speed: 0.0003 + random() * 0.0014,
+              glow: 1.9 + random() * 2.4,
+              sparkle: random() > 0.9,
+            });
+          }
+        }
+        ribbons.push({
+          points,
+          hue: 188 + spiral * 2.2,
+          phase: random(),
+          speed: 0.000035 + random() * 0.00004,
+        });
+      }
+
+      for (let level = 0; level < 10; level += 1) {
+        const points = [];
+        const t = 0.13 + level * 0.09;
+        for (let step = 0; step <= 54; step += 1) {
+          const angle = (step / 54) * Math.PI * 2 + level * 0.48;
+          const radius =
+            0.48 *
+            Math.pow(t, 0.96) *
+            (1 + Math.sin(angle * 3 + level * 1.7) * 0.035);
+          points.push({
+            x: Math.cos(angle) * radius,
+            y:
+              -0.445 +
+              t * 0.89 +
+              Math.sin(angle * 2.2 + level) * 0.012,
+            z: Math.sin(angle) * radius,
+          });
+          if (step < 54 && step % 4 === 0) {
+            treePoints.push({
+              x: Math.cos(angle + 0.035) * radius * (0.98 + random() * 0.05),
+              y:
+                -0.445 +
+                t * 0.89 +
+                Math.sin(angle * 2.2 + level) * 0.012 +
+                (random() - 0.5) * 0.018,
+              z: Math.sin(angle + 0.035) * radius * (0.98 + random() * 0.05),
+              size: 0.28 + random() * 0.8,
+              alpha: 0.25 + random() * 0.5,
+              hue: 190 + random() * 23,
+              phase: random() * Math.PI * 2,
+              speed: 0.0003 + random() * 0.0012,
+              glow: 1.7 + random() * 2,
+              sparkle: random() > 0.93,
+            });
+          }
+        }
+        ribbons.push({
+          points,
+          hue: 190 + level * 1.4,
+          phase: random(),
+          speed: 0.000022 + random() * 0.00003,
+          ring: true,
+        });
+      }
+
+      for (let branch = 0; branch < 220; branch += 1) {
+        const t = 0.08 + Math.pow(random(), 0.88) * 0.9;
+        const canopy = 0.48 * Math.pow(t, 1.02);
+        const angle = random() * Math.PI * 2;
+        const innerRadius = canopy * (0.22 + random() * 0.38);
+        const outerRadius = canopy * (0.82 + random() * 0.2);
+        const y = -0.445 + t * 0.89;
+        const a = {
+          x: Math.cos(angle) * innerRadius,
+          y,
+          z: Math.sin(angle) * innerRadius,
+        };
+        const b = {
+          x: Math.cos(angle + 0.035) * outerRadius,
+          y: y - 0.012 - t * 0.012,
+          z: Math.sin(angle + 0.035) * outerRadius,
+        };
+        branches.push({ a, b, t });
+        for (let glint = 1; glint <= 2; glint += 1) {
+          const mix = glint / 3;
+          treePoints.push({
+            x: a.x + (b.x - a.x) * mix + (random() - 0.5) * 0.012,
+            y: a.y + (b.y - a.y) * mix + (random() - 0.5) * 0.014,
+            z: a.z + (b.z - a.z) * mix + (random() - 0.5) * 0.012,
+            size: 0.26 + random() * 0.72,
+            alpha: 0.22 + random() * 0.54,
+            hue: 193 + random() * 22,
+            phase: random() * Math.PI * 2,
+            speed: 0.0003 + random() * 0.0012,
+            glow: 1.6 + random() * 2.1,
+          });
+        }
+        if (random() > 0.35) {
+          treePoints.push({
+            x: b.x,
+            y: b.y,
+            z: b.z,
+            size: 0.3 + random() * 0.9,
+            alpha: 0.24 + random() * 0.58,
+            hue: 194 + random() * 24,
+            phase: random() * Math.PI * 2,
+            speed: 0.00025 + random() * 0.0011,
+            glow: 1.6 + random() * 2,
+            sparkle: random() > 0.88,
+          });
+        }
+      }
+
+      for (let mote = 0; mote < 650; mote += 1) {
+        const t = 0.04 + Math.pow(random(), 0.74) * 0.95;
+        const maxRadius = 0.48 * Math.pow(t, 1.01);
+        const angle = random() * Math.PI * 2;
+        const radius = maxRadius * (0.76 + random() * 0.26);
+        treePoints.push({
+          x: Math.cos(angle) * radius,
+          y: -0.445 + t * 0.89 + (random() - 0.5) * 0.035,
+          z: Math.sin(angle) * radius,
+          size: 0.24 + random() * 0.82,
+          alpha: 0.16 + random() * 0.56,
+          hue: 198 + random() * 26,
+          phase: random() * Math.PI * 2,
+          speed: 0.00025 + random() * 0.0013,
+          glow: 1.55 + random() * 2.2,
+          sparkle: random() > 0.94,
+        });
+      }
+
+      for (let halo = 0; halo < 190; halo += 1) {
+        const t = 0.1 + Math.pow(random(), 0.84) * 0.87;
+        const maxRadius = 0.48 * Math.pow(t, 1.01);
+        const angle = random() * Math.PI * 2;
+        const radius = maxRadius * (1 + random() * 0.18);
+        treePoints.push({
+          x: Math.cos(angle) * radius,
+          y: -0.445 + t * 0.89 + (random() - 0.5) * 0.045,
+          z: Math.sin(angle) * radius,
+          size: 0.2 + random() * 0.66,
+          alpha: 0.12 + random() * 0.42,
+          hue: 196 + random() * 26,
+          phase: random() * Math.PI * 2,
+          speed: 0.0003 + random() * 0.0014,
+          glow: 1.5 + random() * 2,
+          sparkle: random() > 0.95,
+        });
+      }
+
+      for (let light = 0; light < 60; light += 1) {
+        const t = 0.12 + random() * 0.83;
+        const angle = random() * Math.PI * 2;
+        const radius = 0.48 * Math.pow(t, 1.01) * (0.9 + random() * 0.09);
+        treePoints.push({
+          x: Math.cos(angle) * radius,
+          y: -0.445 + t * 0.89,
+          z: Math.sin(angle) * radius,
+          size: 1.35 + random() * 1.35,
+          alpha: 0.7 + random() * 0.28,
+          hue: 190 + random() * 20,
+          phase: random() * Math.PI * 2,
+          speed: 0.0007 + random() * 0.0016,
+          glow: 3.6 + random() * 2.4,
+          sparkle: random() > 0.38,
+        });
+      }
+
+      for (let star = 0; star < 205; star += 1) {
+        backgroundStars.push({
+          x: random(),
+          y: random() * 0.94,
+          radius: 0.28 + Math.pow(random(), 2) * 1.25,
+          alpha: 0.2 + random() * 0.68,
+          phase: random() * Math.PI * 2,
+          speed: 0.0003 + random() * 0.0011,
+        });
+      }
+
+      for (let flake = 0; flake < 215; flake += 1) {
+        snowflakes.push({
+          x: random(),
+          y: random(),
+          radius: 0.35 + Math.pow(random(), 1.8) * 1.55,
+          speed: 0.016 + random() * 0.04,
+          drift: 0.006 + random() * 0.022,
+          phase: random() * Math.PI * 2,
+          alpha: 0.22 + random() * 0.62,
+          depth: random(),
+        });
+      }
+
+      function boxSize() {
+        return Math.min(state.width * 1.03, state.height * 0.94);
+      }
+
+      function project(point, yaw) {
+        const box = boxSize();
+        const cosine = Math.cos(yaw);
+        const sine = Math.sin(yaw);
+        const x = point.x * cosine - point.z * sine;
+        const z = point.x * sine + point.z * cosine;
+        const perspective = 1 + z * 0.13;
+        return {
+          x: state.width * 0.5 + x * box * perspective,
+          y: state.height * 0.465 + point.y * box * 0.93 * perspective,
+          z,
+          perspective,
+        };
+      }
+
+      function resize() {
+        const bounds = stage.getBoundingClientRect();
+        state.width = Math.max(1, bounds.width);
+        state.height = Math.max(1, bounds.height);
+        state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(state.width * state.dpr);
+        canvas.height = Math.round(state.height * state.dpr);
+        canvas.style.width = `${state.width}px`;
+        canvas.style.height = `${state.height}px`;
+        ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      }
+
+      function drawBackground(now) {
+        const { width: w, height: h } = state;
+        const time = now * 0.001;
+        const pointerX = state.pointerActive ? (state.pointerX / w - 0.5) * w * 0.025 : 0;
+        const pointerY = state.pointerActive ? (state.pointerY / h - 0.5) * h * 0.018 : 0;
+        const backdrop = ctx.createRadialGradient(
+          w * (0.5 + Math.sin(time * 0.11) * 0.018) + pointerX,
+          h * (0.4 + Math.cos(time * 0.09) * 0.012) + pointerY,
+          4,
+          w * 0.5,
+          h * 0.48,
+          Math.max(w, h) * 0.7,
+        );
+        backdrop.addColorStop(0, "#123a67");
+        backdrop.addColorStop(0.3, "#082244");
+        backdrop.addColorStop(0.68, "#031128");
+        backdrop.addColorStop(1, "#010510");
+        ctx.fillStyle = backdrop;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        const halo = ctx.createRadialGradient(
+          w * (0.5 + Math.sin(time * 0.16) * 0.024) + pointerX,
+          h * (0.42 + Math.cos(time * 0.13) * 0.018) + pointerY,
+          2,
+          w * 0.5,
+          h * 0.42,
+          Math.min(w, h) * 0.42,
+        );
+        halo.addColorStop(0, "rgba(53, 171, 255, 0.16)");
+        halo.addColorStop(0.38, "rgba(34, 104, 232, 0.08)");
+        halo.addColorStop(1, "rgba(4, 12, 31, 0)");
+        ctx.fillStyle = halo;
+        ctx.fillRect(0, 0, w, h);
+
+        for (let mist = 0; mist < 3; mist += 1) {
+          const drift = Math.sin(time * (0.13 + mist * 0.023) + mist * 1.8);
+          const mistX =
+            w * (0.22 + mist * 0.29 + drift * 0.055) +
+            pointerX * (mist % 2 ? -0.65 : 0.8);
+          const mistY =
+            h * (0.34 + mist * 0.16 + Math.cos(time * 0.1 + mist) * 0.045) +
+            pointerY;
+          const mistRadius = Math.min(w, h) * (0.2 + mist * 0.035);
+          const mistGlow = ctx.createRadialGradient(
+            mistX,
+            mistY,
+            0,
+            mistX,
+            mistY,
+            mistRadius,
+          );
+          mistGlow.addColorStop(
+            0,
+            mist === 1
+              ? "rgba(90, 167, 255, 0.075)"
+              : "rgba(58, 191, 255, 0.055)",
+          );
+          mistGlow.addColorStop(0.42, "rgba(42, 114, 233, 0.032)");
+          mistGlow.addColorStop(1, "rgba(16, 62, 162, 0)");
+          ctx.fillStyle = mistGlow;
+          ctx.fillRect(
+            mistX - mistRadius,
+            mistY - mistRadius,
+            mistRadius * 2,
+            mistRadius * 2,
+          );
+        }
+
+        for (let shaft = 0; shaft < 3; shaft += 1) {
+          ctx.save();
+          ctx.translate(
+            w * (0.31 + shaft * 0.19 + Math.sin(time * 0.08 + shaft) * 0.012),
+            -h * 0.08,
+          );
+          ctx.rotate(-0.11 + shaft * 0.09 + Math.sin(time * 0.06 + shaft) * 0.018);
+          const lightShaft = ctx.createLinearGradient(0, 0, 0, h * 0.72);
+          lightShaft.addColorStop(0, "rgba(117, 214, 255, 0.055)");
+          lightShaft.addColorStop(0.7, "rgba(54, 138, 255, 0.014)");
+          lightShaft.addColorStop(1, "rgba(26, 74, 189, 0)");
+          ctx.fillStyle = lightShaft;
+          ctx.fillRect(-w * 0.025, 0, w * 0.05, h * 0.72);
+          ctx.restore();
+        }
+
+        for (const star of backgroundStars) {
+          const twinkle = 0.5 + 0.5 * Math.sin(now * star.speed + star.phase);
+          const driftX = Math.sin(now * 0.000045 + star.phase * 1.7) * w * 0.008;
+          const driftY = Math.cos(now * 0.000037 + star.phase) * h * 0.007;
+          const flare = star.radius > 1.1 ? 1.45 : 1;
+          ctx.fillStyle = `rgba(205, 236, 255, ${star.alpha * (0.35 + twinkle * 0.65)})`;
+          ctx.beginPath();
+          ctx.arc(
+            star.x * w + driftX,
+            star.y * h + driftY,
+            star.radius * flare,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawGroundGlow() {
+        const { width: w, height: h } = state;
+        const box = boxSize();
+        const groundY = h * 0.465 + 0.45 * box * 0.93;
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.translate(w * 0.5, groundY);
+        ctx.scale(1, 0.3);
+        const glow = ctx.createRadialGradient(0, 0, 1, 0, 0, box * 0.54);
+        glow.addColorStop(0, "rgba(83, 190, 255, 0.2)");
+        glow.addColorStop(0.46, "rgba(41, 112, 245, 0.09)");
+        glow.addColorStop(1, "rgba(0, 22, 60, 0)");
+        ctx.fillStyle = glow;
+        ctx.fillRect(-box * 0.62, -box * 0.62, box * 1.24, box * 1.24);
+        ctx.restore();
+      }
+
+      function drawSnow(now, foreground) {
+        const { width: w, height: h } = state;
+        const deltaScale = reducedMotionQuery.matches ? 0 : 0.001;
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        for (const flake of snowflakes) {
+          if ((flake.depth > 0.47) !== foreground) {
+            continue;
+          }
+          if (deltaScale) {
+            flake.y += flake.speed * deltaScale;
+            if (flake.y > 1.04) {
+              flake.y = -0.04;
+              flake.x = random();
+            }
+          }
+          const sway = Math.sin(now * 0.00024 + flake.phase) * flake.drift * w;
+          const x = flake.x * w + sway;
+          const y = flake.y * h;
+          const twinkle = 0.7 + 0.3 * Math.sin(now * 0.0007 + flake.phase);
+          ctx.fillStyle = `rgba(225, 246, 255, ${flake.alpha * twinkle})`;
+          ctx.beginPath();
+          ctx.arc(x, y, flake.radius * (foreground ? 1.15 : 0.8), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function spawnBurst(x, y, amount = 34) {
+        const total = reducedMotionQuery.matches ? Math.ceil(amount * 0.6) : amount;
+        for (let index = 0; index < total; index += 1) {
+          const angle = random() * Math.PI * 2;
+          const speed = 0.035 + random() * 0.14;
+          const life = 650 + random() * 850;
+          bursts.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 0.02,
+            size: 0.7 + random() * 1.9,
+            hue: 188 + random() * 35,
+            life,
+            maxLife: life,
+          });
+        }
+      }
+
+      function drawBursts(delta) {
+        if (!bursts.length) {
+          return;
+        }
+
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        for (let index = bursts.length - 1; index >= 0; index -= 1) {
+          const particle = bursts[index];
+          particle.life -= delta;
+          if (particle.life <= 0) {
+            bursts.splice(index, 1);
+            continue;
+          }
+
+          particle.x += particle.vx * delta;
+          particle.y += particle.vy * delta;
+          particle.vy += 0.000035 * delta;
+          particle.vx *= Math.pow(0.985, delta / 16.67);
+          particle.vy *= Math.pow(0.986, delta / 16.67);
+
+          const lifeRatio = particle.life / particle.maxLife;
+          const alpha = Math.pow(lifeRatio, 1.5);
+          const radius = particle.size * (0.5 + lifeRatio * 0.8);
+
+          ctx.strokeStyle = `hsla(${particle.hue}, 100%, 82%, ${alpha * 0.28})`;
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(particle.x - particle.vx * 7, particle.y - particle.vy * 7);
+          ctx.lineTo(particle.x, particle.y);
+          ctx.stroke();
+
+          ctx.fillStyle = `hsla(${particle.hue}, 100%, 86%, ${alpha * 0.16})`;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, radius * 4.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = `hsla(${particle.hue}, 100%, 94%, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawRibbons(now) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        for (const ribbon of ribbons) {
+          const points = ribbon.points.map((point) => project(point, state.yaw));
+          for (let index = 1; index < points.length; index += 1) {
+            const previous = points[index - 1];
+            const current = points[index];
+            const depth = (previous.z + current.z) * 0.5;
+            const front = Math.max(0, Math.min(1, depth + 0.5));
+            const fade = Math.sin((index / (points.length - 1)) * Math.PI) * 0.18 + 0.82;
+            const alpha =
+              (ribbon.ring ? 0.042 : 0.06) + front * (ribbon.ring ? 0.095 : 0.15);
+
+            ctx.strokeStyle = `hsla(${ribbon.hue}, 100%, 72%, ${alpha * fade})`;
+            ctx.lineWidth = (ribbon.ring ? 2.5 : 3) * (0.48 + front * 0.72);
+            ctx.beginPath();
+            ctx.moveTo(previous.x, previous.y);
+            ctx.lineTo(current.x, current.y);
+            ctx.stroke();
+
+            ctx.strokeStyle = `hsla(${ribbon.hue}, 100%, 91%, ${alpha * 0.82 * fade})`;
+            ctx.lineWidth = 0.55 + front * 0.6;
+            ctx.beginPath();
+            ctx.moveTo(previous.x, previous.y);
+            ctx.lineTo(current.x, current.y);
+            ctx.stroke();
+          }
+
+          const pulse = (now * ribbon.speed + ribbon.phase) % 1;
+          const pulseIndex = Math.min(
+            points.length - 1,
+            Math.floor(pulse * (points.length - 1)),
+          );
+          const point = points[pulseIndex];
+          if (point.z > -0.08) {
+            drawFourPointSparkle(
+              point.x,
+              point.y,
+              1.35 + point.perspective * 1.2,
+              ribbon.hue,
+              ribbon.ring ? 0.36 : 0.5,
+            );
+          }
+        }
+        ctx.restore();
+      }
+
+      function drawBranches(now) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.lineCap = "round";
+        for (const branch of branches) {
+          const start = project(branch.a, state.yaw);
+          const end = project(branch.b, state.yaw);
+          const front = Math.max(0, Math.min(1, (start.z + end.z) * 0.5 + 0.5));
+          const shimmer = 0.72 + 0.28 * Math.sin(now * 0.0012 + branch.t * 19);
+          ctx.strokeStyle = `hsla(192, 100%, 85%, ${(0.035 + front * 0.13) * shimmer})`;
+          ctx.lineWidth = 0.38 + front * 0.62;
+          ctx.beginPath();
+          ctx.moveTo(start.x, start.y);
+          ctx.lineTo(end.x, end.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function drawTree(now) {
+        drawRibbons(now);
+        drawBranches(now);
+        const projected = treePoints.map((point) => ({
+          point,
+          screen: project(point, state.yaw),
+        }));
+        projected.sort((a, b) => a.screen.z - b.screen.z);
+
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        for (const item of projected) {
+          const { point, screen } = item;
+          const pulse = 0.62 + 0.38 * Math.sin(now * point.speed + point.phase);
+          const depthAlpha = 0.7 + (screen.z + 0.5) * 0.5;
+          let pointerBoost = 0;
+          if (state.pointerActive) {
+            const dx = screen.x - state.pointerX;
+            const dy = screen.y - state.pointerY;
+            const reach = Math.min(state.width, state.height) * 0.16;
+            pointerBoost = Math.max(0, 1 - (dx * dx + dy * dy) / (reach * reach));
+          }
+          const alpha = point.alpha * pulse * depthAlpha * (1 + pointerBoost * 1.05);
+          const radius = Math.max(
+            0.4,
+            point.size * screen.perspective * (1 + pointerBoost * 0.58),
+          );
+
+          ctx.fillStyle = `hsla(${point.hue}, 92%, 67%, ${alpha * 0.14})`;
+          ctx.beginPath();
+          ctx.arc(screen.x, screen.y, radius * point.glow * 2.15, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = `hsla(${point.hue}, 100%, 72%, ${alpha * 0.5})`;
+          ctx.beginPath();
+          ctx.arc(screen.x, screen.y, radius * 1.45, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = `hsla(${point.hue}, 100%, 88%, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(screen.x, screen.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (point.sparkle && radius > 0.42) {
+            const length = radius * (3.4 + pulse * 2.3);
+            ctx.strokeStyle = `hsla(${point.hue}, 100%, 94%, ${alpha * 0.76})`;
+            ctx.lineWidth = 0.55 + radius * 0.16;
+            ctx.beginPath();
+            ctx.moveTo(screen.x - length, screen.y);
+            ctx.lineTo(screen.x + length, screen.y);
+            ctx.moveTo(screen.x, screen.y - length);
+            ctx.lineTo(screen.x, screen.y + length);
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+      }
+
+      function drawFourPointSparkle(x, y, radius, hue, alpha) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = `hsla(${hue}, 100%, 82%, ${alpha * 0.16})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 2.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        const ray = ctx.createLinearGradient(-radius, 0, radius, 0);
+        ray.addColorStop(0, `hsla(${hue}, 100%, 85%, 0)`);
+        ray.addColorStop(0.5, `hsla(${hue}, 100%, 92%, ${alpha})`);
+        ray.addColorStop(1, `hsla(${hue}, 100%, 85%, 0)`);
+        ctx.fillStyle = ray;
+        ctx.fillRect(-radius * 2.3, -0.55, radius * 4.6, 1.1);
+        ctx.save();
+        ctx.rotate(Math.PI / 2);
+        ctx.fillRect(-radius * 2.3, -0.55, radius * 4.6, 1.1);
+        ctx.restore();
+        ctx.restore();
+      }
+
+      function drawTopStar(now) {
+        const top = project({ x: 0, y: -0.465, z: 0 }, state.yaw);
+        const pulse = 0.9 + 0.1 * Math.sin(now * 0.0017);
+        const radius = Math.max(9, state.width * 0.019);
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+
+        const halo = ctx.createRadialGradient(
+          top.x,
+          top.y,
+          0,
+          top.x,
+          top.y,
+          radius * 7.5 * pulse,
+        );
+        halo.addColorStop(0, "rgba(232, 253, 255, 0.76)");
+        halo.addColorStop(0.12, "rgba(139, 227, 255, 0.42)");
+        halo.addColorStop(0.38, "rgba(67, 150, 255, 0.14)");
+        halo.addColorStop(1, "rgba(24, 87, 255, 0)");
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(top.x, top.y, radius * 7.5 * pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        const rays = [
+          { angle: -Math.PI / 2, length: 5.7, width: 1.15, alpha: 0.78 },
+          { angle: -2.03, length: 3.7, width: 0.62, alpha: 0.46 },
+          { angle: -1.17, length: 4.1, width: 0.74, alpha: 0.52 },
+          { angle: -0.18, length: 3.3, width: 0.54, alpha: 0.38 },
+          { angle: 2.94, length: 2.8, width: 0.42, alpha: 0.32 },
+          { angle: 2.72, length: 2.2, width: 0.34, alpha: 0.24 },
+        ];
+
+        for (const ray of rays) {
+          ctx.save();
+          ctx.translate(top.x, top.y);
+          ctx.rotate(ray.angle);
+          const length = radius * ray.length * pulse;
+          const beam = ctx.createLinearGradient(-length * 0.5, 0, length, 0);
+          beam.addColorStop(0, "rgba(104, 205, 255, 0)");
+          beam.addColorStop(0.45, `rgba(176, 238, 255, ${ray.alpha * 0.35})`);
+          beam.addColorStop(0.84, `rgba(255, 255, 255, ${ray.alpha})`);
+          beam.addColorStop(1, "rgba(104, 205, 255, 0)");
+          ctx.fillStyle = beam;
+          ctx.beginPath();
+          ctx.moveTo(-length * 0.5, 0);
+          ctx.lineTo(length * 0.72, -ray.width * 0.34);
+          ctx.lineTo(length, 0);
+          ctx.lineTo(length * 0.72, ray.width * 0.34);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+
+        const core = ctx.createRadialGradient(
+          top.x,
+          top.y,
+          0,
+          top.x,
+          top.y,
+          radius * 2.1,
+        );
+        core.addColorStop(0, "rgba(255, 255, 255, 1)");
+        core.addColorStop(0.28, "rgba(225, 252, 255, 0.96)");
+        core.addColorStop(0.68, "rgba(121, 218, 255, 0.36)");
+        core.addColorStop(1, "rgba(72, 155, 255, 0)");
+        ctx.fillStyle = core;
+        ctx.beginPath();
+        ctx.arc(top.x, top.y, radius * 2.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let spark = 0; spark < 14; spark += 1) {
+          const angle = spark * 2.399 + now * 0.00008;
+          const distance = radius * (1.6 + (spark % 5) * 0.52);
+          const size = 0.45 + (spark % 4) * 0.24;
+          const flicker = 0.32 + 0.68 * Math.sin(now * 0.0013 + spark * 1.7) ** 2;
+          ctx.fillStyle = `rgba(200, 243, 255, ${0.24 + flicker * 0.54})`;
+          ctx.beginPath();
+          ctx.arc(
+            top.x + Math.cos(angle) * distance,
+            top.y + Math.sin(angle) * distance,
+            size,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawSpacedText(text, centerX, y, spacing) {
+        const characters = Array.from(text);
+        const widths = characters.map((character) => ctx.measureText(character).width);
+        const totalWidth =
+          widths.reduce((sum, width) => sum + width, 0) +
+          Math.max(0, characters.length - 1) * spacing;
+        let x = centerX - totalWidth / 2;
+        ctx.textAlign = "left";
+        characters.forEach((character, index) => {
+          ctx.fillText(character, x, y);
+          x += widths[index] + spacing;
+        });
+      }
+
+      function drawGreeting() {
+        const { width: w, height: h } = state;
+        ctx.save();
+        ctx.globalAlpha = state.revealProgress;
+        const bottomFade = ctx.createLinearGradient(0, h - 132, 0, h);
+        bottomFade.addColorStop(0, "rgba(1, 7, 18, 0)");
+        bottomFade.addColorStop(0.58, "rgba(1, 7, 18, 0.34)");
+        bottomFade.addColorStop(1, "rgba(1, 6, 16, 0.72)");
+        ctx.fillStyle = bottomFade;
+        ctx.fillRect(0, h - 132, w, 132);
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = "rgba(82, 189, 255, 0.9)";
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = "rgba(225, 246, 255, 0.92)";
+        ctx.font = '500 12px "Cormorant SC", "Cormorant Garamond", Georgia, serif';
+        drawSpacedText("A SEASON OF LIGHT", w * 0.5, h - 88, Math.max(2.2, w * 0.006));
+
+        let greetingSize = Math.max(22, Math.min(38, w * 0.053));
+        ctx.font = `italic 500 ${greetingSize}px "Cormorant Garamond", "Baskerville", Georgia, "Times New Roman", serif`;
+        while (ctx.measureText("MERRY CHRISTMAS").width > w * 0.78 && greetingSize > 18) {
+          greetingSize -= 1;
+          ctx.font = `italic 500 ${greetingSize}px "Cormorant Garamond", "Baskerville", Georgia, "Times New Roman", serif`;
+        }
+        ctx.shadowColor = "rgba(103, 201, 255, 0.95)";
+        ctx.shadowBlur = 22;
+        ctx.fillStyle = "rgba(242, 252, 255, 0.98)";
+        ctx.textAlign = "center";
+        ctx.fillText("MERRY CHRISTMAS", w * 0.5, h - 54);
+
+        const recipient = `FOR ${state.recipientName.toLocaleUpperCase("en")}`;
+        ctx.shadowColor = "rgba(82, 189, 255, 0.7)";
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = "rgba(202, 238, 255, 0.9)";
+        const nameSize = Math.max(17, Math.min(22, w * 0.033));
+        ctx.font = `500 ${nameSize}px "Cormorant SC", "Cormorant Garamond", Georgia, serif`;
+        drawSpacedText(recipient, w * 0.5, h - 23, Math.max(1.2, w * 0.0035));
+        ctx.restore();
+      }
+
+      function drawVignette() {
+        const { width: w, height: h } = state;
+        const vignette = ctx.createRadialGradient(
+          w * 0.5,
+          h * 0.46,
+          Math.min(w, h) * 0.28,
+          w * 0.5,
+          h * 0.46,
+          Math.max(w, h) * 0.74,
+        );
+        vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
+        vignette.addColorStop(0.8, "rgba(0, 3, 12, 0.12)");
+        vignette.addColorStop(1, "rgba(0, 2, 8, 0.42)");
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, w, h);
+      }
+
+      function persist() {
+        if (!window.openai || typeof window.openai.setWidgetState !== "function") {
+          return;
+        }
+        window.openai
+          .setWidgetState({
+            modelContent: {
+              recipientName: state.recipientName,
+            },
+            privateContent: {
+              recipientName: state.recipientName,
+            },
+          })
+          .catch(() => {});
+      }
+
+      function applyName(value, announce = false) {
+        const cleaned = String(value || "")
+          .replace(/[^\x20-\x7E]/g, "")
+          .trim()
+          .slice(0, 24);
+        const next = cleaned || "MY FRIEND";
+        state.recipientName = next;
+        if (nameInput.value !== next) {
+          nameInput.value = next;
+        }
+        if (nameEntry.value !== next) {
+          nameEntry.value = next;
+        }
+        if (announce) {
+          status.textContent = `Christmas greeting updated for ${next}.`;
+        }
+      }
+
+      function restoreState() {
+        const widgetState = window.openai && window.openai.widgetState;
+        const saved =
+          widgetState && widgetState.privateContent
+            ? widgetState.privateContent
+            : widgetState;
+        if (saved && typeof saved.recipientName === "string") {
+          applyName(saved.recipientName);
+        }
+      }
+
+      nameInput.addEventListener("input", () => {
+        applyName(nameInput.value);
+        persist();
+      });
+
+      nameInput.addEventListener("change", () => {
+        applyName(nameInput.value, true);
+        persist();
+      });
+
+      function revealTree() {
+        applyName(nameEntry.value || nameInput.value, true);
+        state.revealed = true;
+        state.revealProgress = 1;
+        entry.classList.add("is-hidden");
+        entry.setAttribute("aria-hidden", "true");
+        window.setTimeout(() => {
+          entry.hidden = true;
+          controls.hidden = false;
+        }, reducedMotionQuery.matches ? 0 : 720);
+        persist();
+
+        const rect = canvas.getBoundingClientRect();
+        spawnBurst(rect.width * 0.5, rect.height * 0.45, 52);
+        spawnBurst(rect.width * 0.5, rect.height * 0.2, 22);
+        drawFrame(performance.now(), 16);
+        status.textContent = `The tree is now glowing for ${state.recipientName}.`;
+      }
+
+      entryForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        revealTree();
+      });
+
+      lightButton.addEventListener("click", (event) => {
+        event.preventDefault();
+        revealTree();
+      });
+
+      nameEntry.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          revealTree();
+        }
+      });
+
+      sparkleButton.addEventListener("click", () => {
+        const rect = canvas.getBoundingClientRect();
+        const x = rect.width * (0.5 + (random() - 0.5) * 0.2);
+        const y = rect.height * (0.48 + (random() - 0.5) * 0.24);
+        spawnBurst(x, y, 48);
+        spawnBurst(rect.width * 0.5, rect.height * 0.2, 16);
+        status.textContent = `Stardust scattered for ${state.recipientName}.`;
+      });
+
+      function updatePointer(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        state.pointerX = clientX - rect.left;
+        state.pointerY = clientY - rect.top;
+        state.pointerActive =
+          state.revealed &&
+          state.pointerX >= 0 &&
+          state.pointerX <= rect.width &&
+          state.pointerY >= 0 &&
+          state.pointerY <= rect.height;
+      }
+
+      function startGesture(clientX, clientY) {
+        state.dragging = true;
+        state.lastPointerX = clientX;
+        state.lastPointerY = clientY;
+        state.dragStartX = clientX;
+        state.dragStartY = clientY;
+        state.dragDistance = 0;
+        state.velocity = 0;
+        updatePointer(clientX, clientY);
+      }
+
+      function moveGesture(clientX, clientY) {
+        updatePointer(clientX, clientY);
+        if (!state.dragging) {
+          return;
+        }
+        const movement = clientX - state.lastPointerX;
+        const movementY = clientY - state.lastPointerY;
+        state.lastPointerX = clientX;
+        state.lastPointerY = clientY;
+        state.dragDistance += Math.hypot(movement, movementY);
+        state.yaw += movement * 0.008;
+        state.velocity = movement * 0.00018;
+      }
+
+      function endGesture(clientX, clientY) {
+        if (!state.dragging) {
+          return;
+        }
+        state.dragging = false;
+        if (state.dragDistance < 7) {
+          updatePointer(clientX, clientY);
+          spawnBurst(state.pointerX, state.pointerY, 34);
+          status.textContent = `Stardust scattered for ${state.recipientName}.`;
+        }
+      }
+
+      if ("PointerEvent" in window) {
+        stage.addEventListener("pointerdown", (event) => {
+          if (!state.revealed || event.target !== canvas) {
+            return;
+          }
+          startGesture(event.clientX, event.clientY);
+          if (stage.setPointerCapture) {
+            stage.setPointerCapture(event.pointerId);
+          }
+        });
+
+        stage.addEventListener("pointermove", (event) => {
+          moveGesture(event.clientX, event.clientY);
+        });
+
+        function finishPointer(event) {
+          endGesture(event.clientX, event.clientY);
+          if (stage.hasPointerCapture && stage.hasPointerCapture(event.pointerId)) {
+            stage.releasePointerCapture(event.pointerId);
+          }
+        }
+
+        stage.addEventListener("pointerup", finishPointer);
+        stage.addEventListener("pointercancel", finishPointer);
+        stage.addEventListener("pointerleave", () => {
+          if (!state.dragging) {
+            state.pointerActive = false;
+          }
+        });
+      } else {
+        stage.addEventListener(
+          "touchstart",
+          (event) => {
+            if (!state.revealed) {
+              return;
+            }
+            const touch = event.changedTouches[0];
+            startGesture(touch.clientX, touch.clientY);
+            event.preventDefault();
+          },
+          { passive: false },
+        );
+
+        stage.addEventListener(
+          "touchmove",
+          (event) => {
+            if (!state.dragging) {
+              return;
+            }
+            const touch = event.touches[0] || event.changedTouches[0];
+            moveGesture(touch.clientX, touch.clientY);
+            event.preventDefault();
+          },
+          { passive: false },
+        );
+
+        function finishTouch(event) {
+          const touch = event.changedTouches[0];
+          endGesture(touch.clientX, touch.clientY);
+        }
+
+        stage.addEventListener("touchend", finishTouch);
+        stage.addEventListener("touchcancel", finishTouch);
+      }
+
+      window.addEventListener("openai:set_globals", (event) => {
+        const globals = event.detail && event.detail.globals;
+        const nextState = globals && globals.widgetState;
+        const saved =
+          nextState && nextState.privateContent
+            ? nextState.privateContent
+            : nextState;
+        if (saved && typeof saved.recipientName === "string") {
+          applyName(saved.recipientName);
+        }
+      });
+
+      function drawFrame(now, delta) {
+        if (state.revealed && state.revealProgress < 1) {
+          state.revealProgress = Math.min(
+            1,
+            state.revealProgress + (reducedMotionQuery.matches ? 1 : delta / 1250),
+          );
+        }
+
+        if (!state.dragging) {
+          if (state.spinning && !reducedMotionQuery.matches) {
+            state.yaw += delta * 0.00033;
+          }
+          if (Math.abs(state.velocity) > 0.000008) {
+            state.yaw += state.velocity * delta;
+            state.velocity *= Math.pow(0.92, delta / 16.67);
+          }
+        }
+
+        drawBackground(now);
+        drawSnow(now, false);
+        if (state.revealed && state.revealProgress > 0) {
+          ctx.save();
+          ctx.globalAlpha = state.revealProgress;
+          drawGroundGlow();
+          drawTree(now);
+          drawTopStar(now);
+          ctx.restore();
+          drawBursts(delta);
+          drawGreeting();
+        }
+        drawSnow(now, true);
+        drawVignette();
+      }
+
+      function render(now) {
+        const delta = state.lastFrame ? Math.min(32, now - state.lastFrame) : 0;
+        state.lastFrame = now;
+        drawFrame(now, delta);
+
+        window.requestAnimationFrame(render);
+      }
+
+      if (typeof ResizeObserver === "function") {
+        const resizeObserver = new ResizeObserver(resize);
+        resizeObserver.observe(stage);
+      } else {
+        window.addEventListener("resize", resize);
+        window.addEventListener("orientationchange", resize);
+      }
+      resize();
+      restoreState();
+      applyName(state.recipientName);
+      render(performance.now());
+    })();
+  </script>
+</div>
+
+</body>
+</html>
